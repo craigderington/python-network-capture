@@ -1,4 +1,4 @@
-##### Python3: Network Packet Capture
+#### Python3: Network Packet Capture
 
 This Python project is based on the packet sniffer tutorial by thenewboston.
 
