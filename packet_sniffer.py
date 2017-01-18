@@ -42,19 +42,18 @@ def main():
             if proto == 1:
                 icmp_type, code, checksum, data = icmp_packet(data)
                 print(TAB_1 + 'ICMP Packet:')
-                print(TAB_2 + 'Type: {}, Code: {}, Checksum: {}', format(icmp_type, code, checksum))
+                print(TAB_2 + 'Type: {}, Code: {}, Checksum: {}'.format(icmp_type, code, checksum))
                 print(TAB_2 + 'Data:')
                 print(format_multi_line(DATA_TAB_3, data))
 
             elif proto == 6:
-                (src_port, dest_port, sequence, acknowledgment, flag_urg, flag_ack, flag_psh, flag_rst, \
-                 flag_syn, flag_fin) = tcp_segment(data)
+                (src_port, dest_port, sequence, acknowledgment, flag_urg, flag_ack, flag_psh, flag_rst, flag_syn, flag_fin, offset_reserved_flags) = tcp_segment(data)
                 print(TAB_1 + 'TCP Segment:')
                 print(TAB_2 + 'Source Port: {}, Destination Port: {}'.format(src_port, dest_port))
                 print(TAB_2 + 'Sequence: {}, Acknowledgment: {}'.format(sequence, acknowledgment))
                 print(TAB_2 + 'Flags:')
-                print(TAB_3 + 'URG: {}, ACK: {}, PSH: {}, RST: {}, SYN: {}, FIN: {}'.format(flag_urg, flag_ack, \
-                                                                                            flag_psh, flag_rst, \
+                print(TAB_3 + 'URG: {}, ACK: {}, PSH: {}, RST: {}, SYN: {}, FIN: {}'.format(flag_urg, flag_ack,
+                                                                                            flag_psh, flag_rst,
                                                                                             flag_syn, flag_fin))
                 print(TAB_2 + 'Data:')
                 print(format_multi_line(DATA_TAB_3, data))
@@ -107,7 +106,7 @@ def icmp_packet(data):
 
 # unpack tcp segment
 def tcp_segment(data):
-    (src_port, dest_port, sequence, acknowledgment, offset_reserved_flags) = struct.unpack('! H H L H H', data[:14])
+    (src_port, dest_port, sequence, acknowledgment, offset_reserved_flags) = struct.unpack('! H H L L H', data[:14])
     offset = (offset_reserved_flags >> 12) * 4
     flag_urg = (offset_reserved_flags & 32) >> 5
     flag_ack = (offset_reserved_flags & 16) >> 4
@@ -128,7 +127,7 @@ def udp_segment(data):
 def format_multi_line(prefix, string, size=80):
     size -= len(prefix)
     if isinstance(string, bytes):
-        string = ''.join(r'\x{:02x}'.format(bytes) for byte in string)
+        string = ''.join(r'\x{:02x}'.format(byte) for byte in string)
         if size % 2:
             size -= 1
     return '\n'.join(prefix + line for line in textwrap.wrap(string, size))
